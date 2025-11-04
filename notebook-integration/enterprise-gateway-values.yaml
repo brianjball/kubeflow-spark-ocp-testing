@@ -1,0 +1,23 @@
+image: elyra/enterprise-gateway:3.2.3
+imagePullPolicy: Always
+logLevel: DEBUG
+
+kernel:
+  shareGatewayNamespace: true
+  launchTimeout: 300
+  cullIdleTimeout: 3600
+  allowedKernels:
+    - pyspark
+    - python3
+  defaultKernelName: pyspark
+
+kernelspecsPvc:
+  enabled: true
+  name: pvc-kernelspecs
+
+kip:
+  enabled: false
+  image: elyra/kernel-image-puller:3.2.3
+  imagePullPolicy: Always
+  pullPolicy: Always
+  defaultContainerRegistry: quay.io

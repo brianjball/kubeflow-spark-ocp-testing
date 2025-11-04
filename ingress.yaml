@@ -1,0 +1,28 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: spark-pi-ui-ui-ingress-test
+  namespace: default
+  ownerReferences:
+    - apiVersion: sparkoperator.k8s.io/v1beta2
+      kind: SparkApplication
+      name: spark-pi-ui
+      controller: true
+      blockOwnerDeletion: true
+      uid: fd5ab14c-1f86-4823-9dbb-63ce5c0c4895
+  labels:
+    sparkoperator.k8s.io/app-name: spark-pi-ui
+spec:
+  rules:
+    - host: spark-pi-ui-test.apps.cluster-kfl7t.kfl7t.sandbox5544.opentlc.com
+      http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: spark-pi-ui-ui-svc
+                port:
+                  number: 4040
+  tls:
+    - {}

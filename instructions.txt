@@ -1,0 +1,70 @@
+# This installed in an OpenShift cluster alongside RHOAI 2.25 with no issue.
+
+
+
+helm repo add spark-operator https://kubeflow.github.io/spark-operator
+helm repo update
+
+
+oc new-project kubeflow-spark-operator
+helm install -n kubeflow-spark-operator spark-operator spark-operator/spark-operator -f values.yaml
+  # Update values.yaml for the different cluster details. Also note that you can't just straight use --set because it doesn't like the templating.
+
+  # helm uninstall -n kubeflow-spark-operator spark-operator
+
+# The pods violate the anyuid SCC
+https://github.com/kubeflow/spark-operator/blob/d0c8e69063e3eabf51cc5dc3052879cb5ef5a58b/charts/spark-operator-chart/values.yaml#L171-L173
+Lines 341-343 too
+# "Fix" is below. DO NOT RUN THIS IN PRODUCTION
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spark-nonroot
+  namespace: kubeflow-spark-operator
+subjects:
+  - kind: ServiceAccount
+    name: spark-operator-controller
+    namespace: kubeflow-spark-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'system:openshift:scc:nonroot-v2'
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: spark-nonroot2
+  namespace: kubeflow-spark-operator
+subjects:
+  - kind: ServiceAccount
+    name: spark-operator-webhook
+    namespace: kubeflow-spark-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: 'system:openshift:scc:nonroot-v2'
+
+
+
+
+## Demos
+
+https://github.com/kubeflow/spark-operator/blob/master/examples/spark-pi.yaml
+
+### Note about RBAC
+
+https://github.com/kubeflow/spark-operator/blob/master/examples/spark-pi.yaml
+
+### Note about WebUI
+https://www.kubeflow.org/docs/components/spark-operator/getting-started/#driver-ui-access-and-ingress
+
+ingress-url-format needs to match the *.apps structure of the URL
+  {{$appName}}.apps.$CLUSTER.$BASE
+
+See app-for-ui.yaml
+  Note that the Ingress it creates isn't correct for the Route (see ingress.yaml for an example that does work). You have to set the pathType to prefix and the path to '/'
+    You can work around the problem by setting sparkConf.'spark.ui.proxyRedirectUri': "/jobs/" in the SparkApplication, but the right solution would be to actually fix it: https://github.com/kubeflow/spark-operator/blob/6967e4c094f82c10cd48cddde0838875f5129fdc/internal/controller/sparkapplication/driveringress.go#L139
+  If you are using Chrome (at least), you are also required to set `tls: - {}` in the controller in the Helm chart.
+
+

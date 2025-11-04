@@ -1,0 +1,11 @@
+webhook:
+  enable: true
+podSecurityContext: {}
+
+controller:
+  uiIngress:
+    enable: true
+    urlFormat: https://{{$appName}}.apps.$CLUSTER.$BASE
+    tls:
+      - {}
+     # Replace the cluster URL with your cluster name.

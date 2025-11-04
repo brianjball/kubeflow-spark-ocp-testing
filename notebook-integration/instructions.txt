@@ -1,0 +1,13 @@
+oc new-project enterprise-gateway
+oc apply -f storage.pvc
+
+helm upgrade --install enterprise-gateway \
+  https://github.com/jupyter-server/enterprise_gateway/releases/download/v3.2.3/jupyter_enterprise_gateway_helm-3.2.3.tar.gz \
+  --namespace enterprise-gateway \
+  --values enterprise-gateway-values.yaml \
+  --create-namespace \
+  --wait
+
+oc adm policy add-scc-to-user anyuid -z enterprise-gateway-sa -n enterprise-gateway
+    # Lacks permissions to write to the PVC.
+

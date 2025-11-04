@@ -1,0 +1,38 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: jupyterlab-spark
+  namespace: redhat-ods-applications
+spec:
+  nodeSelector: null
+  output:
+    to:
+      kind: DockerImage
+      name: 'image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/build-jupyterlab-spark'
+  resources: {}
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  strategy:
+    type: Docker
+    dockerStrategy:
+      from:
+        kind: DockerImage
+        name: 'image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2025.2'
+  source:
+    type: Dockerfile
+    dockerfile: |
+      FROM image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2025.2
+      
+      USER root
+      # Install Spark and PySpark
+      ENV SPARK_VERSION=4.0.1
+      RUN wget -qO- https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop3.tgz | tar -xzf - -C /opt/
+      ENV SPARK_HOME=/opt/spark-${SPARK_VERSION}-bin-hadoop3
+      ENV PATH=$PATH:$SPARK_HOME/bin
+      ENV PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-0.10.9-src.zip:$PYTHONPATH
+
+      # Install PySpark and findspark
+      RUN pip install pyspark findspark
+      USER 1001
+      EXPOSE 8888
+  runPolicy: Serial
