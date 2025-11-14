@@ -16,6 +16,9 @@ helm install -n kubeflow-spark-operator spark-operator spark-operator/spark-oper
 https://github.com/kubeflow/spark-operator/blob/d0c8e69063e3eabf51cc5dc3052879cb5ef5a58b/charts/spark-operator-chart/values.yaml#L171-L173
 Lines 341-343 too
 # "Fix" is below. DO NOT RUN THIS IN PRODUCTION
+#  Note that the service account name is actually prepended with the helm chart name.
+#   For example, it might be kubeflow-spark-operator-controller instead.
+
 
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -49,6 +52,9 @@ roleRef:
 
 
 ## Demos
+# Note that the service account is prepended with the helm chart name, just like with the security posture for the operator itself.
+#  For example, it might be kubeflow-spark-operator-spark instead.
+
 
 https://github.com/kubeflow/spark-operator/blob/master/examples/spark-pi.yaml
 
@@ -66,5 +72,16 @@ See app-for-ui.yaml
   Note that the Ingress it creates isn't correct for the Route (see ingress.yaml for an example that does work). You have to set the pathType to prefix and the path to '/'
     You can work around the problem by setting sparkConf.'spark.ui.proxyRedirectUri': "/jobs/" in the SparkApplication, but the right solution would be to actually fix it: https://github.com/kubeflow/spark-operator/blob/6967e4c094f82c10cd48cddde0838875f5129fdc/internal/controller/sparkapplication/driveringress.go#L139
   If you are using Chrome (at least), you are also required to set `tls: - {}` in the controller in the Helm chart.
+
+
+
+
+
+timeToLiveSeconds works on the CustomResource as an auto-teardown
+
+
+In the SparkApplication, you do a runAsUser and runAsGroup, both set to 185. The base Spark image requires this to have proper privileges to read the files inside the running container, so we had to add an SCC.
+  Obviously this is not great, so it would be good if we don't have to create an SCC for this.
+  Similarly, we should provide guidance when building an image to not rely on specific users in order to work.
 
 
