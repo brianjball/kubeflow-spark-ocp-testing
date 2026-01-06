@@ -1,4 +1,4 @@
-This example is designed to run with the spark-examples.jar application. In order to get this, download Spark itself (see line 3 of `build.sh`), and the jar is in `examples/jars` in the `tgz` file.
+This example is designed to run with the the included project. `app.py` is the main script, and there are dependencies in mypackage that run on both the driver and executor nodes to demonstrate how you can manage your project.
 
 
 If you need to, make sure you give the running service account permissions to pull the custom image:
