@@ -1,0 +1,74 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: pvc-dependencies-spark-job-ui
+  namespace: default
+spec:
+  volumes:
+  - name: app-volume
+    emptyDir: {}
+  - name: pvc-dependencies
+    persistentVolumeClaim:
+      claimName: pvc-dependencies
+  sparkConf:
+    spark.eventLog.enabled: "false"
+    spark.ui.proxyRedirectUri: "/jobs/" # Adjust based on your Ingress path
+  type: Scala
+  mode: cluster
+  image: image-registry.openshift-image-registry.svc:5000/custom-spark-job/my-custom-dependencies-image
+  imagePullPolicy: Always
+  mainClass: org.apache.spark.examples.SparkPi
+  mainApplicationFile: local:///opt/spark-examples_2.13-4.0.1.jar
+  arguments:
+  - "250000"
+  sparkVersion: 4.0.0
+  driver:
+    volumeMounts:
+    - name: pvc-dependencies
+      mountPath: /opt/hadoop-3.4.1/
+      subPath: hadoop-3.4.1
+    - name: pvc-dependencies
+      mountPath: /opt/spark-4.0.1-bin-hadoop3/
+      subPath: spark-4.0.1-bin-hadoop3
+    - name: app-volume
+      mountPath: /opt/app-root/src/
+    labels:
+      version: 4.0.0
+    cores: 1
+    memory: 512m
+    serviceAccount: spark-operator-spark
+    securityContext:
+      capabilities:
+        drop:
+        - ALL
+      runAsGroup: 185
+      runAsUser: 185
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+  executor:
+    volumeMounts:
+    - name: pvc-dependencies
+      mountPath: /opt/hadoop-3.4.1/
+      subPath: hadoop-3.4.1
+    - name: pvc-dependencies
+      mountPath: /opt/spark-4.0.1-bin-hadoop3/
+      subPath: spark-4.0.1-bin-hadoop3
+    - name: app-volume
+      mountPath: /opt/app-root/src/
+    labels:
+      version: 4.0.0
+    instances: 2
+    cores: 1
+    memory: 512m
+    securityContext:
+      capabilities:
+        drop:
+        - ALL
+      runAsGroup: 185
+      runAsUser: 185
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault

@@ -1,0 +1,2 @@
+oc new-build --name my-custom-dependencies-image --strategy docker --binary --context-dir . -n custom-spark-job
+oc start-build my-custom-dependencies-image --from-dir . --follow --no-cache -n custom-spark-job
