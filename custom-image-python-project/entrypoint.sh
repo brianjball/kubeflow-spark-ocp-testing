@@ -9,7 +9,8 @@ export JAVA_HOME=$(readlink -nf $(which java) | xargs dirname | xargs dirname) &
     export PYSPARK_PYTHON=python && \
     export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-$PY4J_VERSION-src.zip:/opt/project && \
     export SPARK_DIST_CLASSPATH=$SPARK_HOME/assembly/target/$SCALA_VERSION/jars/* && \
-    export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/bin:$PATH
+    export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/bin:$PATH && \
+    export LD_LIBRARY_PATH=$HADOOP_HOME/lib/native:$LD_LIBRARY_PATH
 
 if [ -z "$JAVA_HOME" ]; then
   JAVA_HOME=$(java -XshowSettings:properties -version 2>&1 > /dev/null | grep 'java.home' | awk '{print $3}')

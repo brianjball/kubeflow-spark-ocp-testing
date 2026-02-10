@@ -19,6 +19,7 @@ echo "export JAVA_HOME=$(alternatives --display java | grep ' link currently poi
     echo "export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-$PY4J_VERSION-src.zip" >> /etc/profile && \
     echo "export SPARK_DIST_CLASSPATH=$SPARK_HOME/assembly/target/$SCALA_VERSION/jars/*" >> /etc/profile && \
     echo "export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/bin:$PATH" >> /etc/profile
+    echo "export LD_LIBRARY_PATH=$HADOOP_HOME/lib/native:$LD_LIBRARY_PATH" >> /etc/profile
 
 export JAVA_HOME=$(readlink -nf $(which java) | xargs dirname | xargs dirname) && \
     export HADOOP_HOME=$HADOOP_HOME && \
@@ -27,6 +28,7 @@ export JAVA_HOME=$(readlink -nf $(which java) | xargs dirname | xargs dirname) &
     export PYSPARK_PYTHON=python && \
     export PYTHONPATH=$SPARK_HOME/python:$SPARK_HOME/python/lib/py4j-$PY4J_VERSION-src.zip && \
     export SPARK_DIST_CLASSPATH=$SPARK_HOME/assembly/target/$SCALA_VERSION/jars/* && \
-    export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/bin:$PATH
+    export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$SPARK_HOME/bin:$PATH && \
+    export LD_LIBRARY_PATH=$HADOOP_HOME/lib/native:$LD_LIBRARY_PATH
 
 pip install pyspark==$SPARK_VERSION
